@@ -11,7 +11,7 @@
    Esa decisión es 100% del backend (avanzarTema en Radio.gs, con lock).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const GAS_URL         = 'https://script.google.com/macros/s/AKfycbyRl3bE68wo-rRyJXCsdZ-DIG7JtDxGPMtz8Gz9fXzN4SEDpyFZHZl44kzSFa6eXo1j/exec';
+const GAS_URL         = 'https://script.google.com/macros/s/AKfycbxc9m7HCoL4Y1df1d3pLzoMEexm8AK7ltRc8vTbkWw4naZM25ycUHmLUdJJF9L-DIezHQ/exec';
 const POLLING_MS      = 30000;
 const CHAT_POLLING_MS = 8000;
 const CORTINA_DURACION_SEG = 45;
