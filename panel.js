@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   El Manijero Radio · panel.js v3.1
+   El Manijero Radio · panel.js v1.1
    Radio global sincronizada.
    El frontend hace 5 cosas:
    1. Entrar sincronizado (offset = ahora - InicioTema)
@@ -1018,4 +1018,4 @@ function updateClock() {
   setEl('evento-fecha', dias[now.getDay()] + ' ' + now.getDate() + ' ' + meses[now.getMonth()]);
 }
 
-console.log('El Manijero Radio v3.1 · listo');
+console.log('El Manijero Radio v1.1 · listo');
