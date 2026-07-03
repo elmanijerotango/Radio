@@ -69,44 +69,55 @@ document.addEventListener('DOMContentLoaded', function () {
 async function sincronizarEntrada() {
   mostrarEstadoCarga('Conectando con la radio…');
 
-  try {
-    const resEstado = await fetch(GAS_URL + '?action=getEstadoRadio');
-    const estado    = await resEstado.json();
+  let intentos = 0;
+  const MAX_INTENTOS = 5;
 
-    const resBib = await fetch(GAS_URL + '?action=getBiblioteca');
-    const bib    = await resBib.json();
+  while (intentos < MAX_INTENTOS) {
+    try {
+      const resEstado = await fetch(GAS_URL + '?action=getEstadoRadio');
+      if (!resEstado.ok) throw new Error('HTTP ' + resEstado.status);
+      const estado = await resEstado.json();
 
-    if (!Array.isArray(bib) || !bib.length) {
-      mostrarEstadoCarga('Radio sin contenido. Iniciá la radio desde el backend.');
-      return;
+      const resBib = await fetch(GAS_URL + '?action=getBiblioteca');
+      if (!resBib.ok) throw new Error('HTTP ' + resBib.status);
+      const bib = await resBib.json();
+
+      if (!Array.isArray(bib) || !bib.length) {
+        mostrarEstadoCarga('Radio sin contenido aún…');
+        return;
+      }
+
+      biblioteca = bib;
+      mostrarEstadoCarga(null);
+      iniciarPolling();
+      iniciarChatPolling();
+
+      if (estado.ok && estado.AudioURL && estado.OffsetSeg >= 0) {
+        const idx = biblioteca.findIndex(t => t.ID === estado.ID);
+        indexActual = idx >= 0 ? idx : 0;
+        pendingOffsetSeg = estado.OffsetSeg;
+        renderTemaActual(biblioteca[indexActual], indexActual);
+        renderCola(biblioteca.slice(indexActual + 1, indexActual + 6));
+      } else {
+        renderBibliotecaCargada();
+      }
+
+      actualizarBotones();
+      actualizarLiveBadge();
+      return; // ✅ éxito, salir del loop
+
+    } catch(e) {
+      intentos++;
+      const espera = intentos * 3; // 3s, 6s, 9s, 12s, 15s
+      console.warn('Intento ' + intentos + ' fallido — reintentando en ' + espera + 's:', e.message);
+      mostrarEstadoCarga('Reconectando… (intento ' + intentos + ' de ' + MAX_INTENTOS + ')');
+      await new Promise(r => setTimeout(r, espera * 1000));
     }
-
-    biblioteca = bib;
-    mostrarEstadoCarga(null);
-    iniciarPolling();
-    iniciarChatPolling();
-
-    if (estado.ok && estado.AudioURL && estado.OffsetSeg >= 0) {
-      const idx = biblioteca.findIndex(t => t.ID === estado.ID);
-      indexActual = idx >= 0 ? idx : 0;
-      // NO reproducir acá. Solo mostrar el estado y dejar listo el offset
-      // para que arranque recién con el click del usuario (gesto requerido
-      // por autoplay policy en mobile).
-      pendingOffsetSeg = estado.OffsetSeg;
-      renderTemaActual(biblioteca[indexActual], indexActual);
-      renderCola(biblioteca.slice(indexActual + 1, indexActual + 6));
-      estadoPanel = 'idle'; // sigue "idle" hasta que el usuario haga click
-    } else {
-      renderBibliotecaCargada();
-    }
-    actualizarBotones();
-
-  } catch (e) {
-    console.warn('Error sincronizando:', e);
-    mostrarEstadoCarga('Error al conectar. Verificá la URL del GAS.');
   }
-}
 
+  // Si falló todo
+  mostrarEstadoCarga('No se pudo conectar. Recargá la página.');
+}
 // ══════════════════════════════════════════════════════════════════════════
 // WEB AUDIO API
 // ══════════════════════════════════════════════════════════════════════════
