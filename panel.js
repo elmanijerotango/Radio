@@ -391,11 +391,40 @@ function reproducirAudio(tema, offsetSeg) {
 function _alTerminarTema() {
   if (estadoPanel !== 'playing') return;
 
-  // Esperar 2 segundos para que el reloj del backend haya avanzado
-  setTimeout(function () {
+  // Avanzar al siguiente tema en la biblioteca local
+  const siguiente = indexActual + 1;
+
+  if (siguiente < biblioteca.length) {
+    // Hay tema siguiente en la biblioteca local → reproducir directo
+    indexActual     = siguiente;
+    idSonandoActual = biblioteca[siguiente].ID;
+    renderTemaActual(biblioteca[siguiente], siguiente);
+    renderCola(biblioteca.slice(siguiente + 1, siguiente + 6));
+    actualizarCopilotoParaTema(biblioteca[siguiente], siguiente);
+    reproducirAudio(biblioteca[siguiente], 0);
+  } else {
+    // No hay más temas → esperar al backend que genere la siguiente tanda
+    setCopiloto('Preparando la próxima tanda…');
+    _esperarNuevaTanda(0);
+  }
+}
+
+function _esperarNuevaTanda(intento) {
+  if (estadoPanel !== 'playing') return;
+  if (intento >= 10) {
+    console.warn('No llegó nueva tanda después de 10 intentos');
+    return;
+  }
+  setTimeout(async function () {
     if (estadoPanel !== 'playing') return;
-    _intentarSincronizar(0);
-  }, 2000);
+    await refrescarBiblioteca();
+    if (biblioteca.length > indexActual + 1) {
+      // Ya hay temas nuevos
+      _alTerminarTema();
+    } else {
+      _esperarNuevaTanda(intento + 1);
+    }
+  }, 3000);
 }
 
 // Reintenta sincronizar hasta 5 veces con backoff
