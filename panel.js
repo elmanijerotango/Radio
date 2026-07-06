@@ -359,7 +359,7 @@ function reproducirAudio(tema, offsetSeg) {
       setTimeout(function () {
         if (audioGenId !== miGenId) return;
         detenerVU();
-        _alTerminarTema();
+        _intentarSincronizar(0);
       }, restante * 1000);
     }
   }, { once: true });
@@ -368,14 +368,14 @@ function reproducirAudio(tema, offsetSeg) {
   el.addEventListener('ended', function () {
     if (audioGenId !== miGenId) return;
     detenerVU();
-    _alTerminarTema();
+    _intentarSincronizar(0);
   });
 
-  el.addEventListener('error', function () {
+ el.addEventListener('error', function () {
     if (audioGenId !== miGenId) return;
     console.warn('Error de audio:', tema.Titulo);
     detenerVU();
-    _alTerminarTema();
+    _intentarSincronizar(0);
   });
 
   el.addEventListener('timeupdate', function () {
@@ -388,44 +388,7 @@ function reproducirAudio(tema, offsetSeg) {
 }
 
 // Cuando un tema termina: esperar un poco y preguntar al backend qué sigue
-function _alTerminarTema() {
-  if (estadoPanel !== 'playing') return;
 
-  // Avanzar al siguiente tema en la biblioteca local
-  const siguiente = indexActual + 1;
-
-  if (siguiente < biblioteca.length) {
-    // Hay tema siguiente en la biblioteca local → reproducir directo
-    indexActual     = siguiente;
-    idSonandoActual = biblioteca[siguiente].ID;
-    renderTemaActual(biblioteca[siguiente], siguiente);
-    renderCola(biblioteca.slice(siguiente + 1, siguiente + 6));
-    actualizarCopilotoParaTema(biblioteca[siguiente], siguiente);
-    reproducirAudio(biblioteca[siguiente], 0);
-  } else {
-    // No hay más temas → esperar al backend que genere la siguiente tanda
-    setCopiloto('Preparando la próxima tanda…');
-    _esperarNuevaTanda(0);
-  }
-}
-
-function _esperarNuevaTanda(intento) {
-  if (estadoPanel !== 'playing') return;
-  if (intento >= 10) {
-    console.warn('No llegó nueva tanda después de 10 intentos');
-    return;
-  }
-  setTimeout(async function () {
-    if (estadoPanel !== 'playing') return;
-    await refrescarBiblioteca();
-    if (biblioteca.length > indexActual + 1) {
-      // Ya hay temas nuevos
-      _alTerminarTema();
-    } else {
-      _esperarNuevaTanda(intento + 1);
-    }
-  }, 3000);
-}
 
 // Reintenta sincronizar hasta 5 veces con backoff
 function _intentarSincronizar(intento) {
