@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const GAS_URL         = 'https://script.google.com/macros/s/AKfycbxc9m7HCoL4Y1df1d3pLzoMEexm8AK7ltRc8vTbkWw4naZM25ycUHmLUdJJF9L-DIezHQ/exec';
-const POLLING_MS      = 30000;
+const POLLING_MS      = 8000;
 const CHAT_POLLING_MS = 8000;
 const CORTINA_DURACION_SEG = 45;
 const CORTINA_FADE_SEG     = 2.5;
@@ -359,7 +359,7 @@ function reproducirAudio(tema, offsetSeg) {
       setTimeout(function () {
         if (audioGenId !== miGenId) return;
         detenerVU();
-        _intentarSincronizar(0);
+        _reportarFinYSincronizar(tema.ID);
       }, restante * 1000);
     }
   }, { once: true });
@@ -368,14 +368,14 @@ function reproducirAudio(tema, offsetSeg) {
   el.addEventListener('ended', function () {
     if (audioGenId !== miGenId) return;
     detenerVU();
-    _intentarSincronizar(0);
+    _reportarFinYSincronizar(tema.ID);
   });
 
  el.addEventListener('error', function () {
     if (audioGenId !== miGenId) return;
     console.warn('Error de audio:', tema.Titulo);
     detenerVU();
-    _intentarSincronizar(0);
+    _reportarFinYSincronizar(tema.ID);
   });
 
   el.addEventListener('timeupdate', function () {
@@ -387,8 +387,15 @@ function reproducirAudio(tema, offsetSeg) {
   });
 }
 
-// Cuando un tema termina: esperar un poco y preguntar al backend qué sigue
-
+// Nueva funcion
+async function _reportarFinYSincronizar(idTemaFinalizado) {
+  try {
+    await fetch(GAS_URL + '?action=avanzarTema&ID=' + encodeURIComponent(idTemaFinalizado));
+  } catch(e) {
+    console.warn('Error reportando fin de tema:', e.message);
+  }
+  _intentarSincronizar(0);
+}
 
 // Reintenta sincronizar hasta 5 veces con backoff
 function _intentarSincronizar(intento) {
