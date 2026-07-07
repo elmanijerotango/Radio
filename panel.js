@@ -6,7 +6,7 @@
    3. Polling cada 8s para mantenerse sincronizado
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const GAS_URL         = 'https://script.google.com/macros/s/AKfycbxlzGL-nsC3BgjbmVRGUOiy6k_6vT9UgqwUN9C8MQbU1_lCl9S5WZZ-VJez7Loqr5nyzw/exec';
+const GAS_URL         = 'https://script.google.com/macros/s/AKfycbw1x9KMW1ZH3QBmVk_dickovUFfNmeHo7IcJtGeNq8RITfBFaKG83jkG8tbm7wxQMxEsQ/exec';
 const POLLING_MS      = 8000;
 const CHAT_POLLING_MS = 8000;
 const CORTINA_DURACION_SEG = 45;
