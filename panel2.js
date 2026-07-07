@@ -7,7 +7,7 @@
    4. NUNCA llama avanzarTema — eso es solo del backend (reloj)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const GAS_URL         = 'https://script.google.com/macros/s/AKfycbxc9m7HCoL4Y1df1d3pLzoMEexm8AK7ltRc8vTbkWw4naZM25ycUHmLUdJJF9L-DIezHQ/exec';
+const GAS_URL         = 'https://script.google.com/macros/s/DESACTIVADO_NO_USAR/exec';
 const POLLING_MS      = 8000;
 const CHAT_POLLING_MS = 8000;
 const CORTINA_DURACION_SEG = 45;
