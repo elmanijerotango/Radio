@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargador de Tangos — Radio Tango DJ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+<style>
+  :root {
+    --bg: #16110f;
+    --bg-panel: #201814;
+    --line: #3a2a22;
+    --gold: #c8983f;
+    --gold-dim: #8a6b34;
+    --cream: #ede3d3;
+    --muted: #a3907c;
+    --ok: #6b8f5c;
+    --err: #b3543f;
+    --wait: #7a6a52;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 32px; }
+  .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 11px;
+    color: var(--gold-dim);
+    margin: 0 0 8px;
+  }
+  h1 {
+    font-size: 34px;
+    font-weight: 400;
+    margin: 0 0 8px;
+    letter-spacing: 0.01em;
+  }
+  h1 em { color: var(--gold); font-style: italic; }
+  .sub { color: var(--muted); font-size: 15px; line-height: 1.5; margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  label {
+    display: block;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 14px 0 5px;
+  }
+  label:first-child { margin-top: 0; }
+  input[type=text], input[type=password] {
+    width: 100%;
+    background: #120d0b;
+    border: 1px solid var(--line);
+    color: var(--cream);
+    padding: 10px 12px;
+    border-radius: 3px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+  }
+  input:focus { outline: none; border-color: var(--gold-dim); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .folder-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 12px 20px;
+    border-radius: 3px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .folder-btn:hover { background: var(--gold); color: #16110f; }
+  input[type=file] { display: none; }
+
+  .summary { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--muted); margin-top: 14px; }
+  .summary b { color: var(--cream); }
+
+  .start-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #16110f;
+    border: none;
+    padding: 14px;
+    border-radius: 3px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .start-btn:disabled { background: var(--wait); color: #16110f; cursor: not-allowed; opacity: .6; }
+  .start-btn:not(:disabled):hover { background: #ddb15e; }
+
+  .progress-bar-outer {
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 18px;
+    display: none;
+  }
+  .progress-bar-inner { height: 100%; background: var(--gold); width: 0%; transition: width .2s ease; }
+  .progress-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    display: none;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; }
+  thead th {
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-dim);
+    border-bottom: 1px solid var(--line);
+    padding: 8px 6px;
+  }
+  tbody td { padding: 7px 6px; border-bottom: 1px solid var(--line); color: var(--cream); }
+  tbody tr:last-child td { border-bottom: none; }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .status-wait { background: rgba(122,106,82,.25); color: var(--wait); }
+  .status-up { background: rgba(200,152,63,.2); color: var(--gold); }
+  .status-ok { background: rgba(107,143,92,.2); color: var(--ok); }
+  .status-err { background: rgba(179,84,63,.2); color: var(--err); }
+
+  .table-scroll { max-height: 420px; overflow-y: auto; }
+
+  footer {
+    text-align: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    color: var(--wait);
+    margin-top: 40px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Radio Tango DJ — Herramienta interna</p>
+    <h1>Cargador de <em>tangos</em> a Cloudinary</h1>
+    <p class="sub">Elegí la carpeta <strong>-TANGO-</strong> de tu compu, revisá la lista y subí todo directo a Cloudinary. Cada tema se agrega solo a tu Google Sheet.</p>
+  </header>
+
+  <div class="panel">
+    <h2>Configuración</h2>
+    <div class="row2">
+      <div>
+        <label for="cloudName">Cloudinary — Cloud name</label>
+        <input type="text" id="cloudName" placeholder="derbton5k">
+      </div>
+      <div>
+        <label for="uploadPreset">Cloudinary — Upload preset (unsigned)</label>
+        <input type="text" id="uploadPreset" placeholder="tango_unsigned">
+      </div>
+    </div>
+    <label for="scriptUrl">URL del Web App de Google Apps Script</label>
+    <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+  </div>
+
+  <div class="panel">
+    <h2>Carpeta -TANGO-</h2>
+    <input type="file" id="folderInput" webkitdirectory directory multiple>
+    <button class="folder-btn" id="pickFolderBtn">Elegir carpeta -TANGO-</button>
+    <div class="summary" id="folderSummary"></div>
+
+    <button class="start-btn" id="startBtn" disabled>Subir todo a Cloudinary</button>
+    <div class="progress-bar-outer" id="progressOuter"><div class="progress-bar-inner" id="progressInner"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <div class="panel" id="resultsPanel" style="display:none;">
+    <h2>Resultado</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Orquesta</th><th>Título</th><th>Género</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>Cloudinary (audio) · Google Apps Script (planilla) · alojado en GitHub Pages</footer>
+</div>
+
+<script>
+const AUDIO_EXT = ['.mp3', '.ogg', '.wav', '.flac', '.m4a', '.aac'];
+
+const cloudNameInput = document.getElementById('cloudName');
+const uploadPresetInput = document.getElementById('uploadPreset');
+const scriptUrlInput = document.getElementById('scriptUrl');
+const folderInput = document.getElementById('folderInput');
+const pickFolderBtn = document.getElementById('pickFolderBtn');
+const folderSummary = document.getElementById('folderSummary');
+const startBtn = document.getElementById('startBtn');
+const progressOuter = document.getElementById('progressOuter');
+const progressInner = document.getElementById('progressInner');
+const progressLabel = document.getElementById('progressLabel');
+const resultsPanel = document.getElementById('resultsPanel');
+const resultsBody = document.getElementById('resultsBody');
+
+// Recordar configuración entre visitas (esta página vive en GitHub Pages,
+// no en claude.ai, así que localStorage funciona normalmente).
+['cloudName', 'uploadPreset', 'scriptUrl'].forEach(id => {
+  const el = document.getElementById(id);
+  const saved = localStorage.getItem('tangoUploader_' + id);
+  if (saved) el.value = saved;
+  el.addEventListener('change', () => localStorage.setItem('tangoUploader_' + id, el.value.trim()));
+});
+
+let tracks = []; // { file, orquesta, titulo, genero, publicId, status, rowEl }
+
+pickFolderBtn.addEventListener('click', () => folderInput.click());
+
+folderInput.addEventListener('change', () => {
+  const files = Array.from(folderInput.files).filter(f =>
+    AUDIO_EXT.some(ext => f.name.toLowerCase().endsWith(ext))
+  );
+
+  tracks = files.map(file => {
+    // webkitRelativePath: "-TANGO-/Rodolfo Biagi/Zaraza.mp3"
+    const parts = file.webkitRelativePath.split('/');
+    const orquesta = parts.length >= 3 ? parts[parts.length - 2] : 'Sin_Orquesta';
+    const baseName = file.name.replace(/\.[^/.]+$/, '');
+    return {
+      file,
+      orquesta: orquesta.trim(),
+      titulo: baseName.replace(/_/g, ' ').trim(),
+      genero: '',
+      publicId: '',
+      status: 'wait'
+    };
+  });
+
+  const orquestas = new Set(tracks.map(t => t.orquesta));
+  folderSummary.innerHTML = `<b>${tracks.length}</b> temas encontrados en <b>${orquestas.size}</b> orquestas.`;
+  startBtn.disabled = tracks.length === 0;
+});
+
+function sanitize(text) {
+  if (!text) return '';
+  return text
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '') // sacar tildes
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '_');
+}
+
+function readTags(file) {
+  return new Promise(resolve => {
+    if (!file.name.toLowerCase().endsWith('.mp3') || typeof jsmediatags === 'undefined') {
+      resolve({ title: null, genre: null });
+      return;
+    }
+    jsmediatags.read(file, {
+      onSuccess: tag => resolve({
+        title: tag.tags.title || null,
+        genre: tag.tags.genre || null
+      }),
+      onError: () => resolve({ title: null, genre: null })
+    });
+  });
+}
+
+async function uploadToCloudinary(track, cloudName, uploadPreset) {
+  const formData = new FormData();
+  formData.append('file', track.file);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('public_id', track.publicId);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Error subiendo a Cloudinary');
+  return data.secure_url;
+}
+
+async function saveToSheet(scriptUrl, row) {
+  await fetch(scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
+    body: JSON.stringify(row)
+  });
+  // Nota: Apps Script Web Apps no siempre devuelven una respuesta legible
+  // desde fetch por CORS; asumimos éxito si no tira excepción de red.
+}
+
+function setStatus(track, status, text) {
+  track.status = status;
+  const pill = track.rowEl.querySelector('.status-pill');
+  pill.className = 'status-pill status-' + status;
+  pill.textContent = text;
+}
+
+startBtn.addEventListener('click', async () => {
+  const cloudName = cloudNameInput.value.trim();
+  const uploadPreset = uploadPresetInput.value.trim();
+  const scriptUrl = scriptUrlInput.value.trim();
+
+  if (!cloudName || !uploadPreset || !scriptUrl) {
+    alert('Completá Cloud name, Upload preset y la URL del Web App antes de empezar.');
+    return;
+  }
+
+  startBtn.disabled = true;
+  pickFolderBtn.disabled = true;
+  progressOuter.style.display = 'block';
+  progressLabel.style.display = 'block';
+  resultsPanel.style.display = 'block';
+  resultsBody.innerHTML = '';
+
+  const usedIds = new Set();
+
+  tracks.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.orquesta}</td><td class="titulo-cell">${t.titulo}</td><td class="genero-cell">—</td><td><span class="status-pill status-wait">Esperando</span></td>`;
+    resultsBody.appendChild(tr);
+    t.rowEl = tr;
+  });
+
+  let done = 0;
+  for (const track of tracks) {
+    setStatus(track, 'up', 'Leyendo tags');
+
+    const tags = await readTags(track.file);
+    if (tags.title) track.titulo = tags.title.trim();
+    if (tags.genre) track.genero = tags.genre.trim();
+    track.rowEl.querySelector('.titulo-cell').textContent = track.titulo;
+    track.rowEl.querySelector('.genero-cell').textContent = track.genero || '—';
+
+    let publicId = `${sanitize(track.orquesta)}_${sanitize(track.titulo)}`;
+    let n = 2;
+    while (usedIds.has(publicId)) { publicId = `${sanitize(track.orquesta)}_${sanitize(track.titulo)}_${n++}`; }
+    usedIds.add(publicId);
+    track.publicId = publicId;
+
+    setStatus(track, 'up', 'Subiendo');
+    try {
+      const audioUrl = await uploadToCloudinary(track, cloudName, uploadPreset);
+
+      setStatus(track, 'up', 'Guardando fila');
+      await saveToSheet(scriptUrl, {
+        ID: publicId,
+        Orquesta: track.orquesta,
+        Titulo: track.titulo,
+        Genero: track.genero,
+        Estilo: '',
+        Anio: '',
+        IDoriginal: '',
+        AudioURL: audioUrl,
+        Activo: 'SI',
+        ObraCanonica: ''
+      });
+
+      setStatus(track, 'ok', 'Listo');
+    } catch (err) {
+      setStatus(track, 'err', 'Error');
+      console.error(track.titulo, err);
+    }
+
+    done++;
+    const pct = Math.round((done / tracks.length) * 100);
+    progressInner.style.width = pct + '%';
+    progressLabel.textContent = `${done} / ${tracks.length} temas procesados`;
+  }
+
+  progressLabel.textContent += ' — Terminado.';
+  pickFolderBtn.disabled = false;
+});
+</script>
+</body>
+</html>
