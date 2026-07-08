@@ -390,11 +390,31 @@ function reproducirAudio(tema, offsetSeg) {
 // y después sincroniza con reintentos.
 async function _reportarFinYSincronizar(idTemaFinalizado) {
   try {
-    await fetch(GAS_URL + '?action=avanzarTema&ID=' + encodeURIComponent(idTemaFinalizado));
+    const res  = await fetch(GAS_URL + '?action=avanzarTema&ID=' + encodeURIComponent(idTemaFinalizado));
+    const data = await res.json();
+
+    if (data.ok && data.estadoActual && data.estadoActual.ID) {
+      idSonandoActual = data.estadoActual.ID;
+      let idx = biblioteca.findIndex(t => t.ID === data.estadoActual.ID);
+
+      if (idx === -1) {
+        await refrescarBiblioteca();
+        idx = biblioteca.findIndex(t => t.ID === data.estadoActual.ID);
+      }
+
+      if (idx !== -1 && estadoPanel === 'playing') {
+        indexActual = idx;
+        reproducirAudio(biblioteca[idx], 0); // ya sabemos que arranca en 0, sin pedirlo de nuevo
+        renderTemaActual(biblioteca[idx], idx);
+        renderCola(biblioteca.slice(idx + 1, idx + 6));
+        actualizarCopilotoParaTema(biblioteca[idx], idx);
+        return;
+      }
+    }
   } catch(e) {
     console.warn('Error reportando fin de tema:', e.message);
   }
-  _intentarSincronizar(0);
+  _intentarSincronizar(0); // fallback: solo si algo de arriba falló
 }
 
 // Reintenta sincronizar hasta 5 veces con backoff
