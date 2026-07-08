@@ -316,7 +316,10 @@ async function uploadToCloudinary(track, cloudName, uploadPreset) {
   formData.append('upload_preset', uploadPreset);
   formData.append('public_id', track.publicId);
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+  // Cloudinary trata los archivos de audio (mp3, wav, etc.) como resource_type
+  // "video", no "raw". Esto además de ser lo correcto, sube el límite de
+  // tamaño del plan gratuito de 10MB (raw) a 100MB (video).
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
     method: 'POST',
     body: formData
   });
@@ -326,13 +329,29 @@ async function uploadToCloudinary(track, cloudName, uploadPreset) {
 }
 
 async function saveToSheet(scriptUrl, row) {
-  await fetch(scriptUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
-    body: JSON.stringify(row)
-  });
-  // Nota: Apps Script Web Apps no siempre devuelven una respuesta legible
-  // desde fetch por CORS; asumimos éxito si no tira excepción de red.
+  try {
+    // Intento normal: si el deployment está bien configurado (Acceso: Cualquier
+    // usuario), esto devuelve JSON legible y podemos confirmar éxito real.
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
+      body: JSON.stringify(row)
+    });
+    const data = await res.json();
+    if (data.status === 'error') throw new Error(data.message || 'Apps Script devolvió error');
+    return;
+  } catch (err) {
+    // Fallback: si el navegador bloquea la respuesta por CORS (deployment mal
+    // configurado) igual mandamos el request en modo "no-cors". No podemos leer
+    // la respuesta, pero Google sí recibe y procesa el POST del otro lado.
+    console.warn('Fallback no-cors para', row.Titulo, err.message);
+    await fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(row)
+    });
+  }
 }
 
 function setStatus(track, status, text) {
@@ -359,6 +378,19 @@ startBtn.addEventListener('click', async () => {
   resultsPanel.style.display = 'block';
   resultsBody.innerHTML = '';
 
+  // Traer los IDs que ya están en el Sheet para no volver a subirlos.
+  progressLabel.textContent = 'Revisando qué temas ya están cargados...';
+  let existingIds = new Set();
+  try {
+    const res = await fetch(scriptUrl);
+    const data = await res.json();
+    if (data.status === 'ok' && Array.isArray(data.ids)) {
+      existingIds = new Set(data.ids);
+    }
+  } catch (err) {
+    console.warn('No se pudo leer los IDs existentes, se va a intentar subir todo:', err);
+  }
+
   const usedIds = new Set();
 
   tracks.forEach(t => {
@@ -369,6 +401,7 @@ startBtn.addEventListener('click', async () => {
   });
 
   let done = 0;
+  let saltados = 0;
   for (const track of tracks) {
     setStatus(track, 'up', 'Leyendo tags');
 
@@ -378,9 +411,22 @@ startBtn.addEventListener('click', async () => {
     track.rowEl.querySelector('.titulo-cell').textContent = track.titulo;
     track.rowEl.querySelector('.genero-cell').textContent = track.genero || '—';
 
-    let publicId = `${sanitize(track.orquesta)}_${sanitize(track.titulo)}`;
+    let baseId = `${sanitize(track.orquesta)}_${sanitize(track.titulo)}`;
+
+    // Si este ID ya existe en el Sheet, lo saltamos: ya se subió en una corrida anterior.
+    if (existingIds.has(baseId)) {
+      setStatus(track, 'ok', 'Ya existía');
+      saltados++;
+      done++;
+      const pct = Math.round((done / tracks.length) * 100);
+      progressInner.style.width = pct + '%';
+      progressLabel.textContent = `${done} / ${tracks.length} procesados (${saltados} ya existían)`;
+      continue;
+    }
+
+    let publicId = baseId;
     let n = 2;
-    while (usedIds.has(publicId)) { publicId = `${sanitize(track.orquesta)}_${sanitize(track.titulo)}_${n++}`; }
+    while (usedIds.has(publicId) || existingIds.has(publicId)) { publicId = `${baseId}_${n++}`; }
     usedIds.add(publicId);
     track.publicId = publicId;
 
@@ -411,7 +457,7 @@ startBtn.addEventListener('click', async () => {
     done++;
     const pct = Math.round((done / tracks.length) * 100);
     progressInner.style.width = pct + '%';
-    progressLabel.textContent = `${done} / ${tracks.length} temas procesados`;
+    progressLabel.textContent = `${done} / ${tracks.length} procesados (${saltados} ya existían)`;
   }
 
   progressLabel.textContent += ' — Terminado.';
