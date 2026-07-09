@@ -19,6 +19,7 @@ let indexActual      = 0;
 let estadoPanel      = 'idle';
 let audioGenId       = 0;
 let idSonandoActual  = null; // ID del tema que el backend dice que suena
+let _ultimoCambioLocalMs = 0; // timestamp del último cambio de tema hecho por este navegador
 
 // ── Web Audio API ──────────────────────────────────────────────────────────
 let audioCtx        = null;
@@ -125,8 +126,12 @@ async function sincronizarConBackend() {
 
     if (!estado.ok || !estado.AudioURL) return;
 
-    // Si el backend dice que suena algo distinto a lo que reproduce el panel
-    if (estado.ID !== idSonandoActual) {
+   // Si el backend dice que suena algo distinto a lo que reproduce el panel
+    // Pero si ESTE navegador ya cambió de tema hace poco (por su cuenta),
+    // ignoramos por unos segundos para no pisar esa transición con datos
+    // desactualizados del backend (caché o latencia de red).
+    const margenGraciaMs = 6000;
+    if (estado.ID !== idSonandoActual && (Date.now() - _ultimoCambioLocalMs) > margenGraciaMs) {
       console.log('🔄 Backend cambió tema → sincronizando:', estado.ID);
       idSonandoActual = estado.ID;
 
@@ -404,6 +409,7 @@ async function _reportarFinYSincronizar(idTemaFinalizado) {
 
       if (idx !== -1 && estadoPanel === 'playing') {
         indexActual = idx;
+        _ultimoCambioLocalMs = Date.now(); // marca: "yo ya avancé, no me pisen por unos segundos"
         reproducirAudio(biblioteca[idx], 0); // ya sabemos que arranca en 0, sin pedirlo de nuevo
         renderTemaActual(biblioteca[idx], idx);
         renderCola(biblioteca.slice(idx + 1, idx + 6));
