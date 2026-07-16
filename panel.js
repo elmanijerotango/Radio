@@ -393,10 +393,18 @@ function reproducirAudio(tema, offsetSeg) {
 
 // Le avisa al backend que el tema terminó (idempotente del lado del backend)
 // y después sincroniza con reintentos.
-async function _reportarFinYSincronizar(idTemaFinalizado) {
+async function _reportarFinYSincronizar(idTemaFinalizado, intento) {
+  intento = intento || 0;
   try {
-    const res  = await fetch(GAS_URL + '?action=avanzarTema&ID=' + encodeURIComponent(idTemaFinalizado));
+    const res  = await fetch(GAS_URL + '?action=avanzarTema&ID=' + encodeURIComponent(idTemaFinalizado) + '&_ts=' + Date.now());
     const data = await res.json();
+
+    if (!data.ok && data.error === 'lock_ocupado' && intento < 6) {
+      // El backend está generando una tanda (puede tardar hasta ~18s con IA).
+      // Reintentamos en vez de caer al polling normal con datos viejos.
+      setTimeout(() => _reportarFinYSincronizar(idTemaFinalizado, intento + 1), 3000);
+      return;
+    }
 
     if (data.ok && data.estadoActual && data.estadoActual.ID) {
       idSonandoActual = data.estadoActual.ID;
