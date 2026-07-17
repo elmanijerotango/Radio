@@ -56,6 +56,18 @@ document.addEventListener('DOMContentLoaded', function () {
   actualizarBotones();
   sincronizarEntrada();
   iniciarCopilotoRotativo();
+
+  // Cuando el celular vuelve de estar bloqueado/en segundo plano,
+  // resincronizamos de inmediato en vez de esperar al próximo poll de 8s.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (estadoPanel === 'playing') {
+        console.log('👁️ Pantalla visible de nuevo → resincronizando');
+        sincronizarConBackend();
+      }
+    }
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════════════
