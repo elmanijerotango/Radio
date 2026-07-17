@@ -706,12 +706,15 @@ function renderTemaActual(tema, index) {
 }
 
 function actualizarContadorTemas() {
-  if (estadoPanel !== 'playing' && estadoPanel !== 'paused') {
+  if (estadoPanel === 'stopped') {
     setEl('m-tanda', '0 / 0');
     return;
   }
   const tema = biblioteca[indexActual];
-  if (!tema) return;
+  if (!tema) {
+    setEl('m-tanda', '0 / 0');
+    return;
+  }
   if (esCortina(tema)) { setEl('m-tanda', 'Cortina'); return; }
   const pt = calcularPosEnTanda();
   setEl('m-tanda', pt.pos + ' / ' + pt.total);
