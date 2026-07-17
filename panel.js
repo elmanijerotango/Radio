@@ -320,12 +320,25 @@ function stopMilonga() {
 
 function reproducirAudio(tema, offsetSeg) {
   const miGenId = ++audioGenId;
-  const el      = new Audio();
+
+  // Pausar explícitamente el audio anterior antes de arrancar uno nuevo,
+  // para que nunca queden dos sonando en paralelo.
+  if (audioEl) {
+    try { audioEl.pause(); } catch(e) {}
+  }
+
+  const el = new Audio();
   el.crossOrigin = 'anonymous';
   el.src         = tema.AudioURL;
-  el.preload     = 'auto';
+ el.preload     = 'auto';
   audioEl        = el;
 
+  let yaReportado = false; // evita reportar el fin de ESTE tema más de una vez
+  function reportarUnaVez() {
+    if (yaReportado) return;
+    yaReportado = true;
+    _reportarFinYSincronizar(tema.ID);
+  }
   function actualizarDuracion() {
     if (audioGenId !== miGenId || !el.duration || isNaN(el.duration)) return;
     setEl('time-total', fmt(Math.floor(el.duration)));
@@ -372,28 +385,28 @@ function reproducirAudio(tema, offsetSeg) {
       cortinaGainNode.gain.setValueAtTime(1, now + fadeOutAt);
       cortinaGainNode.gain.exponentialRampToValueAtTime(0.0001, now + fadeOutAt + CORTINA_FADE_SEG);
 
-      setTimeout(function () {
+     setTimeout(function () {
         if (audioGenId !== miGenId) return;
         detenerVU();
-        _reportarFinYSincronizar(tema.ID);
+        reportarUnaVez();
       }, restante * 1000);
     }
   }, { once: true });
 
   // Tema terminó naturalmente → reportar fin y sincronizar
-  el.addEventListener('ended', function () {
+ el.addEventListener('ended', function () {
     if (audioGenId !== miGenId) return;
     detenerVU();
-    _reportarFinYSincronizar(tema.ID);
+    reportarUnaVez();
   });
 
   el.addEventListener('error', function () {
     if (audioGenId !== miGenId) return;
     console.warn('Error de audio:', tema.Titulo);
     detenerVU();
-    _reportarFinYSincronizar(tema.ID);
+    reportarUnaVez();
   });
-
+   
   el.addEventListener('timeupdate', function () {
     if (audioGenId !== miGenId || !el.duration) return;
     const pct = (el.currentTime / el.duration) * 100;
