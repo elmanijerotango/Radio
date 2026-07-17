@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   El Manijero Radio · panel.js v2.1
+   El Manijero Radio · panel.js v2.2
    Arquitectura: el frontend SOLO reproduce. El backend decide todo.
    1. Al entrar: sincroniza con el estado actual del backend
    2. Cuando un tema termina: reporta el fin y pregunta al backend qué sigue
@@ -997,4 +997,4 @@ function updateClock() {
   setEl('evento-fecha', dias[now.getDay()] + ' ' + now.getDate() + ' ' + meses[now.getMonth()]);
 }
 
-console.log('El Manijero Radio v2.1 · listo');
+console.log('El Manijero Radio v2.2 · listo');
