@@ -361,7 +361,7 @@ function reproducirAudio(tema, offsetSeg) {
       cortinaGainNode.gain.setValueAtTime(1, audioCtx.currentTime);
     }
 
-    el.play().catch(function (err) {
+   el.play().catch(function (err) {
       if (audioGenId !== miGenId) return;
       console.warn('Error reproduciendo:', err);
       // Sin llamar avanzarTema — esperar al polling
@@ -371,6 +371,28 @@ function reproducirAudio(tema, offsetSeg) {
     activarRing(true);
     iniciarVU();
 
+    // Media Session API: declara esta reproducción ante el SO para que
+    // siga sonando con pantalla bloqueada y muestre controles nativos
+    // en la pantalla de bloqueo / notificaciones (como cualquier app de música).
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title:  tema.Titulo   || 'El Manijero Radio',
+        artist: tema.Orquesta || 'Radio en vivo',
+        album:  'El Manijero · Tango 24hs',
+        artwork: [
+          { src: 'https://res.cloudinary.com/dwgwbdtud/image/upload/v1781838389/zcl7vri8xmrryanv6s2l.png', sizes: '512x512', type: 'image/png' }
+        ]
+      });
+
+      navigator.mediaSession.setActionHandler('play', function () {
+        if (estadoPanel === 'paused') reanudar();
+      });
+      navigator.mediaSession.setActionHandler('pause', function () {
+        if (estadoPanel === 'playing') pausarMilonga();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+    }
     // Cortina: fade y al terminar → reportar fin y sincronizar
     if (esCortina(tema) && cortinaGainNode && audioCtx) {
       const now      = audioCtx.currentTime;
