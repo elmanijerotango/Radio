@@ -45,7 +45,6 @@ let pollingTimer  = null;
 let chatTimer     = null;
 let vuTimer       = null;
 let copilotoTimer = null;
-let _audioPrecargado = null; // { id, el } del próximo tema, ya precargándose
 
 // ══════════════════════════════════════════════════════════════════════════
 // ARRANQUE
@@ -333,19 +332,11 @@ function reproducirAudio(tema, offsetSeg) {
     try { audioEl.pause(); } catch(e) {}
   }
 
-  // Si ya lo veníamos precargando de fondo, usamos ESE elemento (ya buffereado),
-  // en vez de crear uno nuevo y esperar la descarga desde cero.
-  let el;
-  if (_audioPrecargado && _audioPrecargado.id === tema.ID) {
-    el = _audioPrecargado.el;
-    _audioPrecargado = null;
-  } else {
-    el = new Audio();
-    el.crossOrigin = 'anonymous';
-    el.src         = tema.AudioURL;
-    el.preload     = 'auto';
-  }
-  audioEl = el;
+  const el = new Audio();
+  el.crossOrigin = 'anonymous';
+  el.src         = tema.AudioURL;
+  el.preload     = 'auto';
+  audioEl        = el;
   let yaReportado = false; // evita reportar el fin de ESTE tema más de una vez
  
    function reportarUnaVez() {
@@ -384,7 +375,6 @@ function reproducirAudio(tema, offsetSeg) {
     resetProgressUI();
     activarRing(true);
     iniciarVU();
-    precargarSiguiente(indexActual);
      
     // Media Session API: declara esta reproducción ante el SO para que
     // siga sonando con pantalla bloqueada y muestre controles nativos
@@ -526,23 +516,7 @@ function detenerAudio() {
   }
   audioGenId++;
 }
-// ══════════════════════════════════════════════════════════════════════════
-// PRECARGA de TEMA
-// ══════════════════════════════════════════════════════════════════════════
 
-
-function precargarSiguiente(index) {
-  const sig = biblioteca[index + 1];
-  if (!sig || !sig.AudioURL) return;
-  if (_audioPrecargado && _audioPrecargado.id === sig.ID) return; // ya lo tenemos
-
-  const el = new Audio();
-  el.crossOrigin = 'anonymous';
-  el.preload = 'auto';
-  el.src = sig.AudioURL;
-  el.load();
-  _audioPrecargado = { id: sig.ID, el };
-}
 // ══════════════════════════════════════════════════════════════════════════
 // POLLING — mantiene sincronía aunque no pase nada
 // ══════════════════════════════════════════════════════════════════════════
