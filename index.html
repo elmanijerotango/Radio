@@ -69,6 +69,60 @@
     <!-- ════════════════════════════════════════ LAYOUT PRINCIPAL -->
     <div class="layout-grid">
 
+
+      
+      <!-- ④ AUDIO -->
+      <div class="card card-audio area-audio">
+        <div class="card-eyebrow">Audio · control</div>
+
+        <div class="knobs-row">
+          <div class="knob-wrap">
+            <div class="knob-label">VOLUMEN</div>
+            <div class="knob-container">
+              <canvas id="knob-canvas" width="74" height="74"></canvas>
+              <div class="knob-db" id="knob-db">-12.0 dB</div>
+            </div>
+          </div>
+          <div class="knob-wrap">
+            <div class="knob-label">GRAVES</div>
+            <div class="knob-container">
+              <canvas id="knob-bass-canvas" width="74" height="74"></canvas>
+              <div class="knob-db" id="bass-db">0.0 dB</div>
+            </div>
+          </div>
+          <div class="knob-wrap">
+            <div class="knob-label">AGUDOS</div>
+            <div class="knob-container">
+              <canvas id="knob-treble-canvas" width="74" height="74"></canvas>
+              <div class="knob-db" id="treble-db">0.0 dB</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- VU verticales reales 
+        <div class="vu-vertical-wrap">
+          <div class="vu-v-meter">
+            <div class="vu-v-bar">
+              <div class="vu-v-fill" id="vu-vf-left" style="height:0%"></div>
+            </div>
+            <span class="vu-v-label">L</span>
+          </div>
+          <div class="vu-v-meter">
+            <div class="vu-v-bar">
+              <div class="vu-v-fill" id="vu-vf-right" style="height:0%"></div>
+            </div>
+            <span class="vu-v-label">R</span>
+          </div>
+          <div class="vu-v-scale">
+            <span>0</span><span>-6</span><span>-12</span><span>-18</span><span>-24</span><span>-∞</span>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+      </div>-->
+
       <!-- ① SONANDO AHORA -->
       <div class="card card-now area-now">
         <div class="card-eyebrow">Sonando ahora · Radio global</div>
@@ -112,37 +166,7 @@
         </div>
       </div>
 
-      <!-- ② COPILOTO (entre Sonando Ahora y A continuación) -->
-      <div class="card card-copiloto area-copiloto">
-        <div class="card-eyebrow">El Manijero</div>
-        <div class="copiloto-inner">
-          <img
-            src="https://res.cloudinary.com/dwgwbdtud/image/upload/v1781831795/z8prgersqwl3z0njcjp1.png"
-            alt="El Manijero"
-            class="copiloto-avatar"
-            onerror="this.style.display='none'"
-          />
-          <div class="copiloto-bubble">
-            <div class="ia-text" id="ia-texto">Iniciando la radio. Un momento…</div>
-          </div>
-        </div>
-
-        <div class="copiloto-rec">
-          <div class="rec-label">Próximo</div>
-          <div class="rec-val" id="rec-proxima">El sistema decide…</div>
-        </div>
-
-        <div class="ajustes-aplicados">
-          <div class="aj-label">Estado del sistema</div>
-          <div class="aj-chips">
-            <span class="aj-chip" id="aj-gain">IA —</span>
-            <span class="aj-chip" id="aj-eq">SYNC —</span>
-            <span class="aj-chip" id="aj-lufs">CHAT —</span>
-            <span class="aj-chip" id="aj-tp">24HS</span>
-          </div>
-        </div>
-      </div>
-
+      
       <!-- ③ TANDA ACTUAL: única fuente de la posición dentro de la tanda (X/Y) -->
       <div class="card card-tanda area-tanda">
         <div class="card-eyebrow">
@@ -177,56 +201,36 @@
         </div>
       </div>
 
-      <!-- ④ AUDIO -->
-      <div class="card card-audio area-audio">
-        <div class="card-eyebrow">Audio · control</div>
 
-        <div class="knobs-row">
-          <div class="knob-wrap">
-            <div class="knob-label">VOLUMEN</div>
-            <div class="knob-container">
-              <canvas id="knob-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="knob-db">-12.0 dB</div>
-            </div>
-          </div>
-          <div class="knob-wrap">
-            <div class="knob-label">GRAVES</div>
-            <div class="knob-container">
-              <canvas id="knob-bass-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="bass-db">0.0 dB</div>
-            </div>
-          </div>
-          <div class="knob-wrap">
-            <div class="knob-label">AGUDOS</div>
-            <div class="knob-container">
-              <canvas id="knob-treble-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="treble-db">0.0 dB</div>
-            </div>
+        <!-- ② COPILOTO (entre Sonando Ahora y A continuación) -->
+      <div class="card card-copiloto area-copiloto">
+        <div class="card-eyebrow">El Manijero</div>
+        <div class="copiloto-inner">
+          <img
+            src="https://res.cloudinary.com/dwgwbdtud/image/upload/v1781831795/z8prgersqwl3z0njcjp1.png"
+            alt="El Manijero"
+            class="copiloto-avatar"
+            onerror="this.style.display='none'"
+          />
+          <div class="copiloto-bubble">
+            <div class="ia-text" id="ia-texto">Iniciando la radio. Un momento…</div>
           </div>
         </div>
 
-        <div class="sep"></div>
-
-        <!-- VU verticales reales -->
-        <div class="vu-vertical-wrap">
-          <div class="vu-v-meter">
-            <div class="vu-v-bar">
-              <div class="vu-v-fill" id="vu-vf-left" style="height:0%"></div>
-            </div>
-            <span class="vu-v-label">L</span>
-          </div>
-          <div class="vu-v-meter">
-            <div class="vu-v-bar">
-              <div class="vu-v-fill" id="vu-vf-right" style="height:0%"></div>
-            </div>
-            <span class="vu-v-label">R</span>
-          </div>
-          <div class="vu-v-scale">
-            <span>0</span><span>-6</span><span>-12</span><span>-18</span><span>-24</span><span>-∞</span>
-          </div>
+        <div class="copiloto-rec">
+          <div class="rec-label">Próximo</div>
+          <div class="rec-val" id="rec-proxima">El sistema decide…</div>
         </div>
 
-        <div class="sep"></div>
+        <div class="ajustes-aplicados">
+          <div class="aj-label">Estado del sistema</div>
+          <div class="aj-chips">
+            <span class="aj-chip" id="aj-gain">IA —</span>
+            <span class="aj-chip" id="aj-eq">SYNC —</span>
+            <span class="aj-chip" id="aj-lufs">CHAT —</span>
+            <span class="aj-chip" id="aj-tp">24HS</span>
+          </div>
+        </div>
       </div>
 
       <!-- ⑤ CHAT — en mobile queda flotante (FAB + drawer, sin cambios).
