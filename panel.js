@@ -20,6 +20,7 @@ let estadoPanel      = 'idle';
 let audioGenId       = 0;
 let idSonandoActual  = null; // ID del tema que el backend dice que suena
 let _ultimoCambioLocalMs = 0; // timestamp del último cambio de tema hecho por este navegador
+let _temaSonandoID = null; // ID del tema que YA está sonando de verdad ahora mismo
 
 // ── Web Audio API ──────────────────────────────────────────────────────────
 let audioCtx        = null;
@@ -319,6 +320,15 @@ function stopMilonga() {
 // ══════════════════════════════════════════════════════════════════════════
 
 function reproducirAudio(tema, offsetSeg) {
+  // Si ya estamos reproduciendo justo este mismo tema, ignoramos el pedido
+  // repetido en vez de reiniciar el audio desde cero. Esto es lo que
+  // generaba el "arranca, corta, vuelve a arrancar" en las cortinas.
+  if (_temaSonandoID === tema.ID && audioEl && !audioEl.paused && !audioEl.ended) {
+    console.log('⏭ Ya sonando ' + tema.ID + ', se ignora pedido duplicado');
+    return;
+  }
+  _temaSonandoID = tema.ID;
+
   const miGenId = ++audioGenId;
 
   // Pausar explícitamente el audio anterior antes de arrancar uno nuevo,
@@ -326,7 +336,6 @@ function reproducirAudio(tema, offsetSeg) {
   if (audioEl) {
     try { audioEl.pause(); } catch(e) {}
   }
-
   const el = new Audio();
   el.crossOrigin = 'anonymous';
   el.src         = tema.AudioURL;
