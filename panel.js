@@ -45,6 +45,7 @@ let pollingTimer  = null;
 let chatTimer     = null;
 let vuTimer       = null;
 let copilotoTimer = null;
+let _audioPrecargado = null; // { id, el } del próximo tema, ya precargándose
 
 // ══════════════════════════════════════════════════════════════════════════
 // ARRANQUE
@@ -320,9 +321,6 @@ function stopMilonga() {
 // ══════════════════════════════════════════════════════════════════════════
 
 function reproducirAudio(tema, offsetSeg) {
-  // Si ya estamos reproduciendo justo este mismo tema, ignoramos el pedido
-  // repetido en vez de reiniciar el audio desde cero. Esto es lo que
-  // generaba el "arranca, corta, vuelve a arrancar" en las cortinas.
   if (_temaSonandoID === tema.ID && audioEl && !audioEl.paused && !audioEl.ended) {
     console.log('⏭ Ya sonando ' + tema.ID + ', se ignora pedido duplicado');
     return;
@@ -331,19 +329,26 @@ function reproducirAudio(tema, offsetSeg) {
 
   const miGenId = ++audioGenId;
 
-  // Pausar explícitamente el audio anterior antes de arrancar uno nuevo,
-  // para que nunca queden dos sonando en paralelo.
   if (audioEl) {
     try { audioEl.pause(); } catch(e) {}
   }
-  const el = new Audio();
-  el.crossOrigin = 'anonymous';
-  el.src         = tema.AudioURL;
- el.preload     = 'auto';
-  audioEl        = el;
 
+  // Si ya lo veníamos precargando de fondo, usamos ESE elemento (ya buffereado),
+  // en vez de crear uno nuevo y esperar la descarga desde cero.
+  let el;
+  if (_audioPrecargado && _audioPrecargado.id === tema.ID) {
+    el = _audioPrecargado.el;
+    _audioPrecargado = null;
+  } else {
+    el = new Audio();
+    el.crossOrigin = 'anonymous';
+    el.src         = tema.AudioURL;
+    el.preload     = 'auto';
+  }
+  audioEl = el;
   let yaReportado = false; // evita reportar el fin de ESTE tema más de una vez
-  function reportarUnaVez() {
+ 
+   function reportarUnaVez() {
     if (yaReportado) return;
     yaReportado = true;
     _reportarFinYSincronizar(tema.ID);
@@ -379,7 +384,8 @@ function reproducirAudio(tema, offsetSeg) {
     resetProgressUI();
     activarRing(true);
     iniciarVU();
-
+    precargarSiguiente(indexActual);
+     
     // Media Session API: declara esta reproducción ante el SO para que
     // siga sonando con pantalla bloqueada y muestre controles nativos
     // en la pantalla de bloqueo / notificaciones (como cualquier app de música).
@@ -520,7 +526,23 @@ function detenerAudio() {
   }
   audioGenId++;
 }
+// ══════════════════════════════════════════════════════════════════════════
+// PRECARGA de TEMA
+// ══════════════════════════════════════════════════════════════════════════
 
+
+function precargarSiguiente(index) {
+  const sig = biblioteca[index + 1];
+  if (!sig || !sig.AudioURL) return;
+  if (_audioPrecargado && _audioPrecargado.id === sig.ID) return; // ya lo tenemos
+
+  const el = new Audio();
+  el.crossOrigin = 'anonymous';
+  el.preload = 'auto';
+  el.src = sig.AudioURL;
+  el.load();
+  _audioPrecargado = { id: sig.ID, el };
+}
 // ══════════════════════════════════════════════════════════════════════════
 // POLLING — mantiene sincronía aunque no pase nada
 // ══════════════════════════════════════════════════════════════════════════
