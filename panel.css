@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   El Manijero · panel.css v3.1 · Cabaret Porteño
+   El Manijero · panel.css v3.2 · Cabaret Porteño
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -316,16 +316,6 @@ html, body {
 .knob-container canvas { display: block; cursor: ns-resize; touch-action: none; }
 .knob-db { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-family: 'Oswald', sans-serif; font-size: 10px; color: var(--crema); white-space: nowrap; }
 
-.vu-vertical-wrap { display: flex; gap: 6px; align-items: flex-end; height: 70px; padding: 4px 0; }
-.vu-v-meter { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-.vu-v-bar {
-  width: 100%; flex: 1; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden;
-  border: 0.5px solid var(--border-soft); display: flex; flex-direction: column-reverse;
-}
-.vu-v-fill { width: 100%; background: linear-gradient(180deg, #E84040 0%, #EFC14A 30%, #4CAF7D 100%); border-radius: 3px; transition: height 0.08s linear; }
-.vu-v-label { font-family: 'Oswald', sans-serif; font-size: 9px; color: var(--crema3); }
-.vu-v-scale { display: flex; flex-direction: column; justify-content: space-between; font-size: 7px; color: var(--crema3); height: 100%; padding: 0 0 2px; }
-
 .sep { height: 0.5px; background: var(--border-soft); margin: 8px 0; }
 
 /* ── Chat: badge/burbuja generados dinámicamente por panel.js ───────── */
@@ -357,18 +347,18 @@ html, body {
 
 /* ══════════════════════════════════════════════════════════════════════════
    LAYOUT GRID
-   Desktop ancho (>1100px, sin el modo full-height): now arriba a la
-   izquierda, copiloto debajo en la misma columna; tanda y audio a la
-   derecha, lado a lado.
+   Orden lógico de las tarjetas: Audio (arriba) · Sonando ahora · Tanda ·
+   Copiloto (debajo de Tanda). El chat es aparte (ver sección CHAT FLOTANTE
+   y el bloque DESKTOP FULL-HEIGHT al final del archivo).
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .layout-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr 0.85fr;
+  grid-template-columns: 1.05fr 1fr;
   grid-template-rows: auto auto;
   grid-template-areas:
-    "now    tanda  audio"
-    "copil  tanda  audio";
+    "audio  tanda"
+    "now    copil";
   gap: 0.6rem;
   align-items: start;
   min-width: 0;
@@ -379,18 +369,18 @@ html, body {
 .area-tanda    { grid-area: tanda; }
 .area-audio    { grid-area: audio; }
 
+/* Tablet (<1100px): 2 columnas, chat sigue flotante (no está en el grid) */
 @media (max-width: 1100px) {
   .layout-grid {
-    flex: 1 1 auto;
-    min-height: 0;
-    grid-template-columns: 1.05fr 1fr 300px;
-    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "audio  tanda  chat"
-      "now    copil  chat";
-    align-items: stretch;
+      "audio  audio"
+      "now    tanda"
+      "copil  copil";
   }
+}
 
+/* Mobile (<768px): todo apilado en una columna, en el orden pedido */
 @media (max-width: 768px) {
   .layout-grid { display: flex; flex-direction: column; gap: 0.6rem; }
   .area-audio    { order: 1; }
@@ -434,6 +424,8 @@ html, body {
 /* ══════════════════════════════════════════════════ CHAT FLOTANTE
    Comportamiento por defecto: mobile y tablet (<1100px).
    FAB circular + drawer que se abre con toggleChatFlotante() en panel.js.
+   En desktop (≥1100px), el bloque DESKTOP FULL-HEIGHT de más abajo
+   sobrescribe estas reglas para que el chat sea una columna fija.
    ═══════════════════════════════════════════════════════════════════ */
 
 .chat-flotante {
@@ -761,7 +753,11 @@ html, body {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   DESKTOP FULL-HEIGHT (≥1100px): sin scroll de página, chat como columna fija
+   DESKTOP FULL-HEIGHT (≥1100px): sin scroll de página, chat como columna fija.
+   Este es el ÚNICO bloque que agrega la 3ra columna "chat" al grid — si en
+   algún momento se vuelve a tocar el layout, la palabra "chat" tiene que
+   seguir apareciendo en grid-template-areas de ESTE bloque, o el chat queda
+   fuera del grid y colapsa a su tamaño mínimo (el bug que arreglamos ahora).
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (min-width: 1100px) {
@@ -778,16 +774,15 @@ html, body {
   .topbar, .controles-milonga { flex: 0 0 auto; }
 
   .layout-grid {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  grid-template-rows: auto 1fr;
-  grid-template-areas:
-    "audio  tanda"
-    "now    copil";
-  gap: 0.6rem;
-  align-items: start;
-  min-width: 0;
-}
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: 1.05fr 1fr 300px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "audio  tanda  chat"
+      "now    copil  chat";
+    align-items: stretch;
+  }
 
   .area-now, .area-copiloto, .area-tanda, .area-audio {
     min-height: 0;
