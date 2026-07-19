@@ -4,7 +4,7 @@
 
 :root {
   --bg-base:       #0E0B09;
-  --bg-card:       rgba(20, 16, 12, 0.86);
+  --bg-card:       rgb(20 16 12 / 27%);
   --bg-deep:       rgba(10, 8, 6, 0.92);
 
   --oro:           #C9924A;
