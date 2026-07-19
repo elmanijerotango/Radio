@@ -818,18 +818,38 @@ html, body {
   /* La marca ya está en el header; el cartel del pie (mobile) sobra acá */
   .app-footer { display: none; }
 
-  /* Cartelito de marca, ahora SÍ visible, debajo de la tanda (columna 2) */
+  /* Cartelito de marca, ahora SÍ visible, debajo de la tanda (columna 2).
+     Sin caja ni fondo — el fileteado porteño hace de marco. */
   .cartelito-desktop {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: var(--bg-card);
-    border: 0.5px solid var(--oro-border);
-    border-radius: 8px;
-    padding: 10px 16px;
+    gap: 2px;
+    padding: 4px 16px 8px;
     text-align: center;
-    box-shadow: var(--shadow-card);
     flex: 0 0 auto;
+  }
+
+  .filete-orn {
+    width: 100%;
+    max-width: 220px;
+    height: 22px;
+    display: block;
+    margin: 2px 0;
+  }
+
+  /* La ornamentación de abajo es la misma que la de arriba, solo espejada
+     verticalmente — así las volutas "abrazan" el texto por los dos lados. */
+  .filete-orn-bottom { transform: scaleY(-1); }
+
+  /* El rombo central respira con un brillo suave — la "vida" del fileteado */
+  .filete-center {
+    animation: filete-pulso 3s ease-in-out infinite;
+    transform-origin: 150px 20px;
+  }
+  @keyframes filete-pulso {
+    0%, 100% { opacity: 0.55; transform: scale(1);   filter: drop-shadow(0 0 0 rgba(243,214,138,0)); }
+    50%      { opacity: 1;    transform: scale(1.25); filter: drop-shadow(0 0 3px rgba(243,214,138,0.7)); }
   }
 
   /* ── Chat: pasa de FAB flotante a columna 3, estirado a toda la altura ── */
