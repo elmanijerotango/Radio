@@ -186,12 +186,36 @@
              de la tanda actual. Sube/baja con la altura real de esa tarjeta.
              En mobile/tablet no se muestra acá (la marca ya está en <footer>
              al final de la página, sin cambios). -->
-        <div class="cartelito-desktop" id="cartelito-desktop">
+      <div class="cartelito-desktop" id="cartelito-desktop">
+          <svg class="filete-orn" viewBox="0 0 300 40" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <linearGradient id="fileteGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"  stop-color="#8a6a2f"/>
+                <stop offset="50%" stop-color="#f3d68a"/>
+                <stop offset="100%" stop-color="#8a6a2f"/>
+                <animateTransform attributeName="gradientTransform" type="translate"
+                  values="-300 0; 300 0; -300 0" dur="6s" repeatCount="indefinite"/>
+              </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#fileteGrad)" stroke-width="1.6" stroke-linecap="round">
+              <path d="M150,20 C165,5 180,8 190,18 C196,25 205,15 215,19 C224,22 230,30 240,26 C248,23 252,14 262,17 C270,19 276,10 285,14"/>
+              <path d="M150,20 C135,5 120,8 110,18 C104,25 95,15 85,19 C76,22 70,30 60,26 C52,23 48,14 38,17 C30,19 24,10 15,14"/>
+            </g>
+            <path class="filete-center" d="M150,13 L157,20 L150,27 L143,20 Z" fill="url(#fileteGrad)"/>
+          </svg>
+
           <div class="cf-titulo">EL MANIJERO</div>
           <div class="cf-sub">RADIO · TANGO 24HS</div>
           <div class="cf-tag">GLOBAL · SINCRONIZADO</div>
-        </div>
 
+          <svg class="filete-orn filete-orn-bottom" viewBox="0 0 300 40" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <g fill="none" stroke="url(#fileteGrad)" stroke-width="1.6" stroke-linecap="round">
+              <path d="M150,20 C165,5 180,8 190,18 C196,25 205,15 215,19 C224,22 230,30 240,26 C248,23 252,14 262,17 C270,19 276,10 285,14"/>
+              <path d="M150,20 C135,5 120,8 110,18 C104,25 95,15 85,19 C76,22 70,30 60,26 C52,23 48,14 38,17 C30,19 24,10 15,14"/>
+            </g>
+            <path class="filete-center" d="M150,13 L157,20 L150,27 L143,20 Z" fill="url(#fileteGrad)"/>
+          </svg>
+        </div>
       </div><!-- /.col-2 -->
 
       <!-- ═══ COLUMNA 3: El Manijero (copiloto) + Chat ═══ -->
