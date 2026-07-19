@@ -56,7 +56,7 @@ html, body {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  filter: brightness(0.90) saturate(3.50);
+  filter: brightness(0.99) saturate(1.50);
   pointer-events: none;
 }
 .bg-overlay::after {
