@@ -69,76 +69,84 @@
     <!-- ════════════════════════════════════════ LAYOUT PRINCIPAL -->
     <div class="layout-grid">
 
-      <!-- ④ AUDIO (arriba del reproductor, sin VU meter) -->
-      <div class="card card-audio area-audio">
-        <div class="card-eyebrow">Audio · control</div>
-        <div class="knobs-row">
-          <div class="knob-wrap">
-            <div class="knob-label">VOLUMEN</div>
-            <div class="knob-container">
-              <canvas id="knob-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="knob-db">-12.0 dB</div>
-            </div>
-          </div>
-          <div class="knob-wrap">
-            <div class="knob-label">GRAVES</div>
-            <div class="knob-container">
-              <canvas id="knob-bass-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="bass-db">0.0 dB</div>
-            </div>
-          </div>
-          <div class="knob-wrap">
-            <div class="knob-label">AGUDOS</div>
-            <div class="knob-container">
-              <canvas id="knob-treble-canvas" width="74" height="74"></canvas>
-              <div class="knob-db" id="treble-db">0.0 dB</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- ═══ COLUMNA 1: Audio + Sonando ahora ═══ -->
+      <div class="col-1">
 
-      <!-- ① SONANDO AHORA -->
-      <div class="card card-now area-now">
-        <div class="card-eyebrow">Sonando ahora · Radio global</div>
-        <div class="now-inner">
-          <div class="album-art">
-            <div class="album-placeholder"><i class="ti ti-vinyl"></i></div>
-            <div class="album-spinning-ring"></div>
-          </div>
-          <div class="now-details">
-            <div class="now-track" id="now-name">El Manijero Radio</div>
-            <div class="now-orq"   id="now-orq">Conectando con la señal…</div>
-            <div class="now-year"  id="now-year">—</div>
-            <div class="chips"     id="now-chips">
-              <span class="chip ch-cortina">Sin datos aún</span>
+        <!-- ④ AUDIO (arriba del reproductor, sin VU meter) -->
+        <div class="card card-audio area-audio">
+          <div class="card-eyebrow">Audio · control</div>
+          <div class="knobs-row">
+            <div class="knob-wrap">
+              <div class="knob-label">VOLUMEN</div>
+              <div class="knob-container">
+                <canvas id="knob-canvas" width="74" height="74"></canvas>
+                <div class="knob-db" id="knob-db">-12.0 dB</div>
+              </div>
             </div>
-            <div class="audio-meta">
-              <span class="meta-item">
-                <span class="meta-label">NIVEL</span>
-                <span class="meta-val" id="meta-lufs">—</span>
-              </span>
+            <div class="knob-wrap">
+              <div class="knob-label">GRAVES</div>
+              <div class="knob-container">
+                <canvas id="knob-bass-canvas" width="74" height="74"></canvas>
+                <div class="knob-db" id="bass-db">0.0 dB</div>
+              </div>
+            </div>
+            <div class="knob-wrap">
+              <div class="knob-label">AGUDOS</div>
+              <div class="knob-container">
+                <canvas id="knob-treble-canvas" width="74" height="74"></canvas>
+                <div class="knob-db" id="treble-db">0.0 dB</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Progreso -->
-        <div class="progress-wrap">
-          <div class="progress-bg">
-            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        <!-- ① SONANDO AHORA -->
+        <div class="card card-now area-now">
+          <div class="card-eyebrow">Sonando ahora · Radio global</div>
+          <div class="now-inner">
+            <div class="album-art">
+              <div class="album-placeholder"><i class="ti ti-vinyl"></i></div>
+              <div class="album-spinning-ring"></div>
+            </div>
+            <div class="now-details">
+              <div class="now-track" id="now-name">El Manijero Radio</div>
+              <div class="now-orq"   id="now-orq">Conectando con la señal…</div>
+              <div class="now-year"  id="now-year">—</div>
+              <div class="chips"     id="now-chips">
+                <span class="chip ch-cortina">Sin datos aún</span>
+              </div>
+              <div class="audio-meta">
+                <span class="meta-item">
+                  <span class="meta-label">NIVEL</span>
+                  <span class="meta-val" id="meta-lufs">—</span>
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="progress-times">
-            <span id="time-current">0:00</span>
-            <span id="time-total">0:00</span>
+
+          <!-- Progreso -->
+          <div class="progress-wrap">
+            <div class="progress-bg">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+            <div class="progress-times">
+              <span id="time-current">0:00</span>
+              <span id="time-total">0:00</span>
+            </div>
+          </div>
+
+          <div class="now-footer">
+            <div class="ia-inline">
+              <i class="ti ti-cpu"></i>
+              <span id="ia-footer-text">En vivo para oyentes de todo el mundo</span>
+            </div>
           </div>
         </div>
 
-        <div class="now-footer">
-          <div class="ia-inline">
-            <i class="ti ti-cpu"></i>
-            <span id="ia-footer-text">En vivo para oyentes de todo el mundo</span>
-          </div>
-        </div>
-      </div>
+      </div><!-- /.col-1 -->
+
+      <!-- ═══ COLUMNA 2: Tanda actual + cartelito (desktop) ═══ -->
+      <div class="col-2">
 
       <!-- ③ TANDA ACTUAL: única fuente de la posición dentro de la tanda (X/Y) -->
       <div class="card card-tanda area-tanda">
@@ -173,6 +181,21 @@
           </div>
         </div>
       </div>
+
+        <!-- Cartelito de marca: SOLO visible en desktop (≥1100px), justo debajo
+             de la tanda actual. Sube/baja con la altura real de esa tarjeta.
+             En mobile/tablet no se muestra acá (la marca ya está en <footer>
+             al final de la página, sin cambios). -->
+        <div class="cartelito-desktop" id="cartelito-desktop">
+          <div class="cf-titulo">EL MANIJERO</div>
+          <div class="cf-sub">RADIO · TANGO 24HS</div>
+          <div class="cf-tag">GLOBAL · SINCRONIZADO</div>
+        </div>
+
+      </div><!-- /.col-2 -->
+
+      <!-- ═══ COLUMNA 3: El Manijero (copiloto) + Chat ═══ -->
+      <div class="col-3">
 
       <!-- ② COPILOTO (debajo de la sección de tandas) -->
       <div class="card card-copiloto area-copiloto">
@@ -289,6 +312,8 @@
 
       </div>
 
+      </div><!-- /.col-3 -->
+
     </div><!-- /.layout-grid -->
 
     <!-- FOOTER (se oculta en desktop ≥1100px porque ya está la marca en el header) -->
@@ -348,3 +373,4 @@
 
 </body>
 </html>
+
