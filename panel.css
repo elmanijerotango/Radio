@@ -56,7 +56,7 @@ html, body {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  filter: brightness(0.65) saturate(0.85);
+  filter: brightness(0.90) saturate(3.50);
   pointer-events: none;
 }
 .bg-overlay::after {
@@ -368,6 +368,16 @@ html, body {
 .area-copiloto { grid-area: copil; }
 .area-tanda    { grid-area: tanda; }
 .area-audio    { grid-area: audio; }
+
+/* Los wrappers de columna (.col-1/.col-2/.col-3) solo existen para el layout
+   de escritorio. En mobile/tablet "desaparecen" con display:contents, así
+   que sus hijos quedan como si fueran hijos directos de .layout-grid —
+   el grid/flex de abajo (order, grid-area) sigue funcionando exactamente
+   igual que antes, sin ningún cambio de comportamiento. */
+.col-1, .col-2, .col-3 { display: contents; }
+
+/* El cartelito de marca duplicado solo se muestra en desktop (ver más abajo) */
+.cartelito-desktop { display: none; }
 
 /* Tablet (<1100px): 2 columnas, chat sigue flotante (no está en el grid) */
 @media (max-width: 1100px) {
@@ -773,39 +783,64 @@ html, body {
 
   .topbar, .controles-milonga { flex: 0 0 auto; }
 
+  /* 3 columnas del mismo ancho, cada una con su propia altura de contenido.
+     Ninguna columna obliga a las otras a igualar altura (a diferencia de un
+     grid con filas compartidas) — así "Audio + Sonando ahora" no se estira
+     ni se amontona cuando "Tanda" tiene más o menos temas cargados. */
   .layout-grid {
+    display: flex;
+    flex-direction: row;
     flex: 1 1 auto;
     min-height: 0;
-    grid-template-columns: 1.05fr 1fr 300px;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "audio  tanda  chat"
-      "now    copil  chat";
-    align-items: stretch;
+    gap: 0.6rem;
+    align-items: stretch; /* las 3 columnas ocupan la altura completa disponible */
+  }
+
+  .col-1, .col-2, .col-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1 1 0;   /* mismo ancho para las 3 */
+    min-width: 0;
+    min-height: 0;
   }
 
   .area-now, .area-copiloto, .area-tanda, .area-audio {
     min-height: 0;
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto; /* cada tarjeta ocupa solo su altura natural, no se estira */
   }
 
-  /* Cada tarjeta scrollea su propio contenido; la página nunca lo hace */
+  /* Cada tarjeta scrollea su propio contenido si hace falta */
   .card { overflow-y: auto; }
 
-  /* La marca ya está en el header; el cartel del pie sobra en esta vista */
+  /* La marca ya está en el header; el cartel del pie (mobile) sobra acá */
   .app-footer { display: none; }
 
-  /* ── Chat: pasa de FAB flotante a columna fija, siempre visible ── */
-  .area-chat {
-    grid-area: chat;
+  /* Cartelito de marca, ahora SÍ visible, debajo de la tanda (columna 2) */
+  .cartelito-desktop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-card);
+    border: 0.5px solid var(--oro-border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    flex: 0 0 auto;
+  }
+
+  /* ── Chat: pasa de FAB flotante a columna 3, estirado a toda la altura ── */
+  .col-3 .chat-flotante {
+    flex: 1 1 auto; /* ocupa el resto de la altura de la columna 3, debajo de Copiloto */
     min-height: 0;
   }
 
   .chat-flotante {
     position: static;
     width: 100%;
-    height: 100%;
     align-items: stretch;
   }
 
